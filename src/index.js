@@ -96,7 +96,8 @@ app.get('/quicktrip/createUserTable', async (req, res) => {
       }
   });
 
-// Users Endpoints
+// Users Endpoints 
+// here the needOnlyUsers should be boolean
 app.get('/quicktrip/users/:needOnlyUsers', async (req, res) => {
     try {
         const query1 = "SELECT * FROM users"
