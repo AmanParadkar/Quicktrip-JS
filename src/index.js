@@ -45,7 +45,7 @@ const createPackageTableQuery =
 `CREATE TABLE packages (
     package_id SERIAL PRIMARY KEY,
     startPoint VARCHAR(255) NOT NULL,
-    destinationL VARCHAR(255) NOT NULL,
+    destination VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     photo VARCHAR(255) NOT NULL
   );`
@@ -57,7 +57,7 @@ app.get('/quicktrip/createUserTable', async (req, res) => {
      db.query(createTableQuery)
         .then((res) => {
           console.log('Table created successfully');
-          res.json(users);
+          res.json();
 
           // Close the pool
           db.end();
@@ -97,9 +97,13 @@ app.get('/quicktrip/createUserTable', async (req, res) => {
   });
 
 // Users Endpoints
-app.get('/quicktrip/users', async (req, res) => {
+app.get('/quicktrip/users/:needOnlyUsers', async (req, res) => {
+   
     try {
-        const result = await db.query("SELECT * FROM users");
+        const query1 = "SELECT * FROM users"
+        const query2 = "SELECT users.*, packages.* FROM users JOIN packages ON users.package_id = packages.package_id;"
+
+        const result = await db.query(req.params.needOnlyUsers === 'true'?query1:query2);
         const users = result.rows;
         res.json(users);
       } catch (error) {
@@ -198,12 +202,12 @@ app.delete("/quicktrip/users/:id", async (req,res) =>{
 //Package Endpoint
 app.get("/quicktrip/package", async (req,res) => {
     try{
-        const result = await db.query('SELECT * from package');
+        const result = await db.query('SELECT * from packages');
         const packagee = result.rows;
         res.json(packagee);
 
     } catch(error) {
-        console.error('Error fetching users:', error.message);
+        console.error('Error fetching packages:', error.message);
         res.status(500).send('Internal Server Error');
     }
 })
@@ -212,15 +216,27 @@ app.post("/quicktrip/package", async (req,res) => {
     try{
         const newPackage = req.body;
 
-        const { package_id, description, photo} = newPackage;
-        
-        const query = {
-            text : 'INSERT into package(package_id,description,photo)VALUES($1, $2, $3) RETURNING *',
-            values : [package_id,description,photo],
-        }
+        const { package_id, description, photo,startPoint,destination} = newPackage;
+        console.log('asdc',newPackage)
 
-        const result = await db.query(query);
-        res.json(result.rows);
+        if(req.body.role === 'Agent'){
+            const query = {
+                text : 'INSERT into packages(package_id,description,photo,startPoint,destination)VALUES($1, $2, $3, $4,$5) RETURNING *',
+                values : [package_id,description,photo,startPoint,destination],
+            }
+    
+            const result = await db.query(query);
+            res.json(result)
+           
+        }
+        else{
+            res.json({
+                status:0,
+                message:'role should be agent for create packages'
+            });
+        }
+        
+        
 
     } catch (error) {
         console.error('Error inserting package:', error.message);

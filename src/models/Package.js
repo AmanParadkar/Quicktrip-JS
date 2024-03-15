@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../utils/database.js';
+import User from './User.js';
 
 const Package = sequelize.define('Package', {
   startPoint:{
@@ -23,6 +24,8 @@ const Package = sequelize.define('Package', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+ 
+
 });
 
 export default Package;
