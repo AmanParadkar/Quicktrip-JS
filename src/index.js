@@ -11,10 +11,14 @@ const db = new pg.Client({
     user: "postgres",
     host: "localhost",
     database: "quicktrip",
-    password: "aman8878",
+    password: "password",
     port: "5432",
 })
-db.connect();
+db.connect().then(()=>{
+    console.log("database connected")
+}).catch((err)=>{
+    console.log("database not connected",err)
+})
 
 // middleware
 app.use(bodyParser.json())
@@ -24,6 +28,73 @@ app.get('/quicktrip/hello', (req, res) => {
     res.send('hello');
     
 });
+
+const createTableQuery = `
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  user_name VARCHAR(255) NOT NULL,
+  role_ VARCHAR(255) NOT NULL,
+  phone_no VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  address_id INTEGER NOT NULL,
+  package_id INTEGER NOT NULL
+);`
+
+const createPackageTableQuery = 
+`CREATE TABLE packages (
+    package_id SERIAL PRIMARY KEY,
+    startPoint VARCHAR(255) NOT NULL,
+    destinationL VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    photo VARCHAR(255) NOT NULL
+  );`
+
+
+
+app.get('/quicktrip/createUserTable', async (req, res) => {
+    try {
+     db.query(createTableQuery)
+        .then((res) => {
+          console.log('Table created successfully');
+          res.json(users);
+
+          // Close the pool
+          db.end();
+        })
+        .catch((err) => {
+          console.error('Error creating table:', err);
+          // Close the pool
+          res.json(err);
+          db.end();
+        });
+      } catch (error) {
+        console.error('Error fetching users:', error.message);
+        res.status(500).send('Internal Server Error');
+      }
+  });
+
+  app.get('/quicktrip/createPackageTable', async (req, res) => {
+    try {
+     db.query(createPackageTableQuery)
+        .then((res) => {
+          console.log('Table created successfully');
+          res.json(users);
+
+          // Close the pool
+          db.end();
+        })
+        .catch((err) => {
+          console.error('Error creating table:', err);
+          // Close the pool
+          res.json(err);
+          db.end();
+        });
+      } catch (error) {
+        console.error('Error fetching users:', error.message);
+        res.status(500).send('Internal Server Error');
+      }
+  });
 
 // Users Endpoints
 app.get('/quicktrip/users', async (req, res) => {
