@@ -98,12 +98,11 @@ app.get('/quicktrip/createUserTable', async (req, res) => {
 
 // Users Endpoints
 app.get('/quicktrip/users/:needOnlyUsers', async (req, res) => {
-   
     try {
         const query1 = "SELECT * FROM users"
         const query2 = "SELECT users.*, packages.* FROM users JOIN packages ON users.package_id = packages.package_id;"
 
-        const result = await db.query(req.params.needOnlyUsers === 'true'?query1:query2);
+        const result = await db.query(req.params.needOnlyUsers === 'true'?query1:query2.length>0?query2:query1);
         const users = result.rows;
         res.json(users);
       } catch (error) {
